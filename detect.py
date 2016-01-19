@@ -9,14 +9,23 @@ roberts_cross_x = np.array( [[1, 0 ],
 roberts_cross_y = np.array( [[0, 1 ],
                              [-1, 0 ]] )
 
-sobel_y = np.array( [[ -1,-2,-1 ],
-                     [ 0, 0, 0 ],
-                     [ 1, 2, 1]] )
 
 sobel_x = np.array( [[ -1, 0, 1 ],
                      [ -2, 0, 2 ],
                      [ -1, 0, 1 ]] )
- 
+
+sobel_y = np.array( [[ -1,-2,-1 ],
+                     [ 0, 0, 0 ],
+                     [ 1, 2, 1]] )
+
+prewitt_x = np.array( [[ -1, 0, 1 ],
+                       [ -1, 0, 1 ],
+                       [ -1, 0, 1]] )
+
+prewitt_y = np.array( [[ -1, -1, -1],
+                       [  0, 0, 0],
+                       [ 1, 1, 1 ]] )
+
 def load_image(infilename):
     img = Image.open(infilename)
     print('format:', img.format, "%dx%d" % img.size, img.mode)
@@ -46,6 +55,13 @@ def sobel( infilename, outfilename ) :
     horizontal = ndimage.convolve( image, sobel_y)
     output_image = np.sqrt( np.square(horizontal) + np.square(vertical))
     save_image( output_image, outfilename )
+    
+def prewitt( infilename, outfilename ) :
+    image = load_image( infilename )
+    vertical = ndimage.convolve( image, prewitt_x )
+    horizontal = ndimage.convolve( image, prewitt_y)
+    output_image = np.sqrt( np.square(horizontal) + np.square(vertical))
+    save_image( output_image, outfilename )
 
 
 #infilename = sys.argv[1]
@@ -53,3 +69,4 @@ def sobel( infilename, outfilename ) :
 
 roberts_cross('image.jpg', 'RCimage.jpg')
 sobel('image.jpg', 'SOBELimage.jpg')
+prewitt('image.jpg', 'PREWITTimage.jpg')
