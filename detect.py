@@ -4,6 +4,7 @@ import numpy as np
 from scipy import ndimage
 from PyQt4 import QtCore, QtGui
 
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -21,65 +22,89 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 
-class Ui_MainWindow(QtGui.QMainWindow):
-    def __init__(self):
-        QtGui.QWidget.__init__(self)
 
-        self.path = ''
+class MainWindow(QtGui.QMainWindow):
+    path = ''
+    image =  Image.new("RGB", (1000, 1000))
         #self.outfilename = self.path + '_edge'
-        self.roberts_cross_x = np.array([[1, 0],
-                                         [0, -1]])
+    roberts_cross_x = np.array([[1, 0],
+                                [0, -1]])
 
-        self.roberts_cross_y = np.array([[0, 1],
-                                         [-1, 0]])
+    roberts_cross_y = np.array([[0, 1],
+                                [-1, 0]])
 
-        self.sobel_x = np.array([[-1, 0, 1],
-                                 [-2, 0, 2],
-                                 [-1, 0, 1]])
+    sobel_x = np.array([[-1, 0, 1],
+                        [-2, 0, 2],
+                         [-1, 0, 1]])
 
-        self.sobel_y = np.array(([-1, -2, -1],
-                                 [0, 0, 0],
-                                 [1, 2, 1]))
+    sobel_y = np.array(([-1, -2, -1],
+                        [0, 0, 0],
+                        [1, 2, 1]))
 
-        self.prewitt_x = np.array(([-1, 0, 1],
-                                   [-1, 0, 1],
-                                   [-1, 0, 1]))
+    prewitt_x = np.array(([-1, 0, 1],
+                          [-1, 0, 1],
+                          [-1, 0, 1]))
 
-        self.prewitt_y = np.array(([-1, -1, -1],
-                                   [0, 0, 0],
-                                   [1, 1, 1]))
+    prewitt_y = np.array(([-1, -1, -1],
+                          [0, 0, 0],
+                          [1, 1, 1]))
 
-        self.scharr_x = np.array(([3, 0, -3],
-                                  [10, 0, -10],
-                                  [3, 0, -3]))
+    scharr_x = np.array(([3, 0, -3],
+                         [10, 0, -10],
+                         [3, 0, -3]))
 
-        self.scharr_y = np.array(([3, 10, 3],
-                                  [0, 0, 0],
-                                  [-3, -10, -3]))
+    scharr_y = np.array(([3, 10, 3],
+                         [0, 0, 0],
+                         [-3, -10, -3]))
 
-        self.setupUi(self)
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(800, 600)
-        self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.pushButton = QtGui.QPushButton(self.centralwidget)
+    def __init__(self):
+        super(MainWindow, self).__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        #MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        #MainWindow.resize(800, 600)
+        #self.path1Label = QtGui.QLabel(self.path)
+
+        #self.centralwidget = QtGui.QWidget(MainWindow)
+        #self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+
+        self.pushButton = QtGui.QPushButton("Krzyz Robertsa", self)
         self.pushButton.setGeometry(QtCore.QRect(50, 150, 121, 31))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
+        self.pushButton.clicked.connect(lambda: self.roberts_cross("OutputRC"))
+
+        self.pushButton_2 = QtGui.QPushButton("Sobel", self)
         self.pushButton_2.setGeometry(QtCore.QRect(50, 190, 121, 31))
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.pushButton_3 = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_2.clicked.connect(lambda: self.sobel("OutputSOBEL"))
+
+        self.pushButton_3 = QtGui.QPushButton("Prewitt", self)
         self.pushButton_3.setGeometry(QtCore.QRect(50, 230, 121, 31))
-        self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
-        self.pushButton_4 = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_3.clicked.connect(lambda: self.roberts_cross("OutputPREWITT"))
+
+        self.pushButton_4 = QtGui.QPushButton("Scharr", self)
         self.pushButton_4.setGeometry(QtCore.QRect(50, 270, 121, 31))
-        self.pushButton_4.setObjectName(_fromUtf8("pushButton_4"))
-        self.pushButton_5 = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_4.clicked.connect(lambda: self.roberts_cross("OutputSCHARR"))
+
+        self.pushButton_5 = QtGui.QPushButton("Zaladuj zdjecie", self)
         self.pushButton_5.setGeometry(QtCore.QRect(50, 80, 121, 31))
-        self.pushButton_5.setObjectName(_fromUtf8("pushButton_5"))
-        self.label = QtGui.QLabel(self.centralwidget)
+        self.pushButton_5.clicked.connect(self.showOpenFileDialog)
+
+        self.pathLabel = QtGui.QLabel(self.path)
+        self.pathLabel.setGeometry(QtCore.QRect(200, 80, 121, 31))
+        #self.pathLabel.setText("costamcotam")
+        #font1 = QtGui.QFont()
+        #font1.setFamily(_fromUtf8("Arial"))
+        #font1.setPointSize(12)
+        #font1.setBold(False)
+        #font1.setWeight(75)
+        #self.pathLabel.setFont(font1)
+
+        #self.label.setObjectName(_fromUtf8("label"))
+
+        self.label = QtGui.QLabel(self)
+        self.label.setText("Detekcja krawędzi w obrazach - projekt")
         self.label.setGeometry(QtCore.QRect(50, 20, 371, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Arial"))
@@ -88,90 +113,84 @@ class Ui_MainWindow(QtGui.QMainWindow):
         font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
-        self.menubar.setObjectName(_fromUtf8("menubar"))
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName(_fromUtf8("statusbar"))
-        MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+       # self.menubar = QtGui.QMenuBar(MainWindow)
+       # self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+       # self.menubar.setObjectName(_fromUtf8("menubar"))
+       # MainWindow.setMenuBar(self.menubar)
+       # self.statusbar = QtGui.QStatusBar(MainWindow)
+       # self.statusbar.setObjectName(_fromUtf8("statusbar"))
+       # MainWindow.setStatusBar(self.statusbar)
 
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
-        self.pushButton_5.setText(_translate("MainWindow", "Załaduj zdjęcie", None))
-        self.pushButton.clicked.connect(self.chooseFile)
-        self.pushButton.setText(_translate("MainWindow", "Krzyż Robertsa", None))
-        self.pushButton.clicked.connect(self.roberts_cross)
-        self.pushButton_2.setText(_translate("MainWindow", "Sobel", None))
-        self.pushButton.clicked.connect(self.sobel)
-        self.pushButton_3.setText(_translate("MainWindow", "Prewitt", None))
-        self.pushButton.clicked.connect(self.prewitt)
-        self.pushButton_4.setText(_translate("MainWindow", "Scharr", None))
-        self.pushButton.clicked.connect(self.scharr)
-        self.label.setText(_translate("MainWindow", "Detekcja krawędzi w obrazach - projekt", None))
+        self.show()
+
 
     def showOpenFileDialog(self):
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Otworz plik')
-        return str(fname)
+        if fname != '':
+            self.image = Image.open(fname)
+            print('format:', self.image.format, "%dx%d" % self.image.size, self.image.mode)
+            self.image.load()
+            self.image = self.image.convert('L')
+
+            return np.asarray(self.image, dtype="int32")
 
     def chooseFile(self):
         self.path = self.showOpenFileDialog()
-        # self.path1Label.setText(self.path)
+        self.pathLabel.setText(self.path)
 
     def load_image(self):
         if self.path != '':
-            img = Image.open(open(self.path, "rb"))
+            img = Image.open(self.path)
             print('format:', img.format, "%dx%d" % img.size, img.mode)
             img.load()
             img = img.convert('L');
             return np.asarray(img, dtype="int32")
 
-    def save_image(data, self):
-        img = Image.fromarray(np.asarray(np.clip(data, 0, 255), dtype="uint8"), "L")
-        print(self.outfilename + ' file saved')
-        img.save(self.outfilename)
+    #@staticmethod
+    def save_image(self, data, outfilename):
+        self.image = Image.fromarray(np.asarray(np.clip(data, 0, 255), dtype="uint8"), "L")
+        print(outfilename + ' file saved')
+        self.image.show()
+        self.image.save(outfilename)
 
     def show_image(imagefilename):
         img = Image.open(imagefilename)
         img.show()
 
     def roberts_cross(self, outfilename):
-        if self.path != '':
-            image = self.load_image
-            vertical = ndimage.convolve(image, self.roberts_cross_x)
-            horizontal = ndimage.convolve(image, self.roberts_cross_y)
+        if self.image != '':
+            #image = self.load_image
+            vertical = ndimage.convolve(self.image, self.roberts_cross_x)
+            horizontal = ndimage.convolve(self.image, self.roberts_cross_y)
             output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
             self.save_image(output_image, outfilename)
 
     def sobel(self, outfilename):
-        image = Image.open(self.path)
-        vertical = ndimage.convolve(image, self.sobel_x)
-        horizontal = ndimage.convolve(image, self.sobel_y)
+        #image = Image.open(self.path)
+        vertical = ndimage.convolve(self.image, self.sobel_x)
+        horizontal = ndimage.convolve(self.image, self.sobel_y)
         output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
         self.save_image(output_image, outfilename)
 
     def prewitt(self, outfilename):
-        image = Image.open(self.path)
-        vertical = ndimage.convolve(image, self.prewitt_x)
-        horizontal = ndimage.convolve(image, self.prewitt_y)
+        #image = Image.open(self.path)
+        vertical = ndimage.convolve(self.image, self.prewitt_x)
+        horizontal = ndimage.convolve(self.image, self.prewitt_y)
         output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
         self.save_image(output_image, outfilename)
 
     def scharr(self, outfilename):
-        image = Image.open(self.path)
-        vertical = ndimage.convolve(image, self.prewitt_x)
-        horizontal = ndimage.convolve(image, self.prewitt_y)
+        #image = Image.open(self.path)
+        vertical = ndimage.convolve(self.image, self.prewitt_x)
+        horizontal = ndimage.convolve(self.image, self.prewitt_y)
         output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
         self.save_image(output_image, outfilename)
 
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    ex = Ui_MainWindow()
+    ex = MainWindow()
     ex.show()
     sys.exit(app.exec_())
 
