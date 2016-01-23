@@ -60,12 +60,12 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-
+        self.resize(800,600)
         self.initUI()
 
     def initUI(self):
         #MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        #MainWindow.resize(800, 600)
+
         #self.path1Label = QtGui.QLabel(self.path)
 
         #self.centralwidget = QtGui.QWidget(MainWindow)
@@ -81,18 +81,18 @@ class MainWindow(QtGui.QMainWindow):
 
         self.pushButton_3 = QtGui.QPushButton("Prewitt", self)
         self.pushButton_3.setGeometry(QtCore.QRect(50, 230, 121, 31))
-        self.pushButton_3.clicked.connect(lambda: self.roberts_cross("OutputPREWITT"))
+        self.pushButton_3.clicked.connect(lambda: self.prewitt("OutputPREWITT"))
 
         self.pushButton_4 = QtGui.QPushButton("Scharr", self)
         self.pushButton_4.setGeometry(QtCore.QRect(50, 270, 121, 31))
-        self.pushButton_4.clicked.connect(lambda: self.roberts_cross("OutputSCHARR"))
+        self.pushButton_4.clicked.connect(lambda: self.scharr("OutputSCHARR"))
 
         self.pushButton_5 = QtGui.QPushButton("Zaladuj zdjecie", self)
         self.pushButton_5.setGeometry(QtCore.QRect(50, 80, 121, 31))
         self.pushButton_5.clicked.connect(self.showOpenFileDialog)
 
-        self.pathLabel = QtGui.QLabel(self.path)
-        self.pathLabel.setGeometry(QtCore.QRect(200, 80, 121, 31))
+        self.pathLabel = QtGui.QLabel(self)
+        self.pathLabel.setGeometry(QtCore.QRect(200, 80, 421, 31))
         #self.pathLabel.setText("costamcotam")
         #font1 = QtGui.QFont()
         #font1.setFamily(_fromUtf8("Arial"))
@@ -126,14 +126,15 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def showOpenFileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Otworz plik')
-        if fname != '':
-            self.image = Image.open(fname)
-            print('format:', self.image.format, "%dx%d" % self.image.size, self.image.mode)
-            self.image.load()
-            self.image = self.image.convert('L')
+        self.path = QtGui.QFileDialog.getOpenFileName(self, 'Otworz plik')
+        self.pathLabel.setText(self.path)
+        #if fname != '':
+        #    self.image = Image.open(fname)
+        #    print('format:', self.image.format, "%dx%d" % self.image.size, self.image.mode)
+        #    self.image.load()
+        #    self.image = self.image.convert('L')
 
-            return np.asarray(self.image, dtype="int32")
+         #   return np.asarray(self.image, dtype="int32")
 
     def chooseFile(self):
         self.path = self.showOpenFileDialog()
@@ -141,51 +142,78 @@ class MainWindow(QtGui.QMainWindow):
 
     def load_image(self):
         if self.path != '':
+            print(self.path)
             img = Image.open(self.path)
             print('format:', img.format, "%dx%d" % img.size, img.mode)
             img.load()
             img = img.convert('L');
             return np.asarray(img, dtype="int32")
 
-    #@staticmethod
-    def save_image(self, data, outfilename):
-        self.image = Image.fromarray(np.asarray(np.clip(data, 0, 255), dtype="uint8"), "L")
+    @staticmethod
+    def save_image(data, outfilename):
+        image = Image.fromarray(np.asarray(np.clip(data, 0, 255), dtype="uint8"), "L")
         print(outfilename + ' file saved')
-        self.image.show()
-        self.image.save(outfilename)
+        image.show()
+        image.save(outfilename + '.jpg')
 
     def show_image(imagefilename):
         img = Image.open(imagefilename)
         img.show()
 
     def roberts_cross(self, outfilename):
-        if self.image != '':
-            #image = self.load_image
-            vertical = ndimage.convolve(self.image, self.roberts_cross_x)
-            horizontal = ndimage.convolve(self.image, self.roberts_cross_y)
+        if self.path != '':
+            #a = self.load_image
+            img = Image.open(self.path)
+            print('format:', img.format, "%dx%d" % img.size, img.mode)
+            img.load()
+            img = img.convert('L');
+            image = np.asarray(img, dtype="int32")
+            vertical = ndimage.convolve(image, self.roberts_cross_x)
+            horizontal = ndimage.convolve(image, self.roberts_cross_y)
             output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
             self.save_image(output_image, outfilename)
 
     def sobel(self, outfilename):
         #image = Image.open(self.path)
-        vertical = ndimage.convolve(self.image, self.sobel_x)
-        horizontal = ndimage.convolve(self.image, self.sobel_y)
-        output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
-        self.save_image(output_image, outfilename)
+        if self.path != '':
+            #a = self.load_image
+            img = Image.open(self.path)
+            print('format:', img.format, "%dx%d" % img.size, img.mode)
+            img.load()
+            img = img.convert('L');
+            image = np.asarray(img, dtype="int32")
+            vertical = ndimage.convolve(image, self.sobel_x)
+            horizontal = ndimage.convolve(image, self.sobel_y)
+            output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
+            self.save_image(output_image, outfilename)
 
     def prewitt(self, outfilename):
         #image = Image.open(self.path)
-        vertical = ndimage.convolve(self.image, self.prewitt_x)
-        horizontal = ndimage.convolve(self.image, self.prewitt_y)
-        output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
-        self.save_image(output_image, outfilename)
+        if self.path != '':
+            #a = self.load_image
+            img = Image.open(self.path)
+            print('format:', img.format, "%dx%d" % img.size, img.mode)
+            img.load()
+            img = img.convert('L');
+            image = np.asarray(img, dtype="int32")
+            vertical = ndimage.convolve(image, self.prewitt_x)
+            horizontal = ndimage.convolve(image, self.prewitt_y)
+            output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
+            self.save_image(output_image, outfilename)
 
     def scharr(self, outfilename):
         #image = Image.open(self.path)
-        vertical = ndimage.convolve(self.image, self.prewitt_x)
-        horizontal = ndimage.convolve(self.image, self.prewitt_y)
-        output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
-        self.save_image(output_image, outfilename)
+        if self.path != '':
+            #a = self.load_image
+            img = Image.open(self.path)
+            print('format:', img.format, "%dx%d" % img.size, img.mode)
+            img.load()
+            img = img.convert('L');
+            image = np.asarray(img, dtype="int32")
+            vertical = ndimage.convolve(image, self.prewitt_x)
+            horizontal = ndimage.convolve(image, self.prewitt_y)
+            output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
+            self.save_image(output_image, outfilename)
 
 
 if __name__ == '__main__':
