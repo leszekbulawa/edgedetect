@@ -1,5 +1,6 @@
 import os, sys
 from PIL import Image
+import cv2
 import numpy as np
 from scipy import ndimage
 from PyQt4 import QtCore, QtGui
@@ -90,6 +91,10 @@ class MainWindow(QtGui.QMainWindow):
         self.pushButton_5 = QtGui.QPushButton("Zaladuj zdjecie", self)
         self.pushButton_5.setGeometry(QtCore.QRect(50, 80, 121, 31))
         self.pushButton_5.clicked.connect(self.showOpenFileDialog)
+
+        self.pushButton_6 = QtGui.QPushButton("Canny", self)
+        self.pushButton_6.setGeometry(QtCore.QRect(50, 310, 121, 31))
+        self.pushButton_6.clicked.connect(lambda: self.canny("OutputCANNY"))
 
         self.pathLabel = QtGui.QLabel(self)
         self.pathLabel.setGeometry(QtCore.QRect(200, 80, 421, 31))
@@ -214,6 +219,24 @@ class MainWindow(QtGui.QMainWindow):
             horizontal = ndimage.convolve(image, self.scharr_y)
             output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
             self.save_image(output_image, outfilename)
+
+    def canny(self, outfilename):
+        #image = Image.open(self.path)
+        if self.path != '':
+            #a = self.load_image
+            img = cv2.imread(self.path)
+            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+            v = np.median(img)
+            sigma = 0.33
+            lower = int(max(0, (1.0 - sigma) * v))
+            upper = int(min(255, (1.0 + sigma) * v))
+            auto = cv2.Canny(blurred, lower, upper)
+            wide = cv2.Canny(blurred, 10, 200)
+            tight = cv2.Canny(blurred, 225, 250)
+            self.save_image(auto, outfilename+"_auto")
+            self.save_image(wide, outfilename+"_wide")
+            self.save_image(tight, outfilename+"_tight")
 
 
 if __name__ == '__main__':
