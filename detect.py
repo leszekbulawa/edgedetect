@@ -210,8 +210,8 @@ class MainWindow(QtGui.QMainWindow):
             img.load()
             img = img.convert('L');
             image = np.asarray(img, dtype="int32")
-            vertical = ndimage.convolve(image, self.prewitt_x)
-            horizontal = ndimage.convolve(image, self.prewitt_y)
+            vertical = ndimage.convolve(image, self.scharr_x)
+            horizontal = ndimage.convolve(image, self.scharr_y)
             output_image = np.sqrt(np.square(horizontal) + np.square(vertical))
             self.save_image(output_image, outfilename)
 
